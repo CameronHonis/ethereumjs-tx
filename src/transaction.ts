@@ -233,14 +233,14 @@ export default class Transaction {
   verifySignature(): boolean {
     const msgHash = this.hash(false)
     // All transaction signatures whose s-value is greater than secp256k1n/2 are considered invalid.
-    if (this._common.gteHardfork('homestead') && new BN(this.s).cmp(N_DIV_2) === 1) {
+    if (this._common.getHardfork('homestead') && new BN(this.s).cmp(N_DIV_2) === 1) {
       return false
     }
 
     try {
       const v = bufferToInt(this.v)
       const useChainIdWhileRecoveringPubKey =
-        v >= this.getChainId() * 2 + 35 && this._common.gteHardfork('spuriousDragon')
+        v >= this.getChainId() * 2 + 35 && this._common.getHardfork('spuriousDragon')
       this._senderPubKey = ecrecover(
         msgHash,
         v,
@@ -295,7 +295,7 @@ export default class Transaction {
    */
   getBaseFee(): BN {
     const fee = this.getDataFee().iaddn(this._common.param('gasPrices', 'tx'))
-    if (this._common.gteHardfork('homestead') && this.toCreationAddress()) {
+    if (this._common.getHardfork('homestead') && this.toCreationAddress()) {
       fee.iaddn(this._common.param('gasPrices', 'txCreation'))
     }
     return fee
@@ -353,7 +353,7 @@ export default class Transaction {
       return
     }
 
-    if (!this._common.gteHardfork('spuriousDragon')) {
+    if (!this._common.getHardfork('spuriousDragon')) {
       return
     }
 
@@ -393,7 +393,7 @@ export default class Transaction {
   }
 
   private _implementsEIP155(): boolean {
-    const onEIP155BlockOrLater = this._common.gteHardfork('spuriousDragon')
+    const onEIP155BlockOrLater = this._common.getHardfork('spuriousDragon')
 
     if (!this._isSigned()) {
       // We sign with EIP155 all unsigned transactions after spuriousDragon
